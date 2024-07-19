@@ -2,11 +2,18 @@ package com.benjaminwan.ocr;
 
 import com.benjaminwan.ocrlibrary.OcrEngine;
 import com.benjaminwan.ocrlibrary.OcrResult;
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.ObjectWriter;
+
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         String jniLibDir = System.getProperty("java.library.path");
-        System.out.println("java.library.path=" + jniLibDir);
+        //System.out.println("java.library.path=" + jniLibDir);
 
         if (args.length < 6) {
             System.out.println("Usage: models/dir det/name cls/name rec/name keys/name image/path");
@@ -107,18 +114,18 @@ public class Main {
         //------- get jni version -------
         OcrEngine ocrEngine = new OcrEngine();
         String version = ocrEngine.getVersion();
-        System.out.println("version=" + version);
+        //System.out.println("version=" + version);
 
         //------- setNumThread -------
         ocrEngine.setNumThread(numThread);
 
         //------- init Logger -------
         ocrEngine.initLogger(
-                true,
-                true,
-                true
+                false,
+                false,
+                false
         );
-        ocrEngine.enableResultText(imagePath);
+        //ocrEngine.enableResultText(imagePath);
 
         //------- init Models -------
         boolean initModelsRet = ocrEngine.initModels(modelsDir, detName, clsName, recName, keysName);
@@ -128,7 +135,7 @@ public class Main {
         }
 
         //------- set param -------
-        System.out.printf("padding(%d) boxScoreThresh(%f) boxThresh(%f) unClipRatio(%f) doAngle(%b) mostAngle(%b)", padding, boxScoreThresh, boxThresh, unClipRatio, doAngle, mostAngle);
+        //System.out.printf("padding(%d) boxScoreThresh(%f) boxThresh(%f) unClipRatio(%f) doAngle(%b) mostAngle(%b)", padding, boxScoreThresh, boxThresh, unClipRatio, doAngle, mostAngle);
         ocrEngine.setPadding(padding); //图像外接白框，用于提升识别率，文字框没有正确框住所有文字时，增加此值。
         ocrEngine.setBoxScoreThresh(boxScoreThresh); //文字框置信度门限，文字框没有正确框住所有文字时，减小此值
         ocrEngine.setBoxThresh(boxThresh); //请自行试验
@@ -142,7 +149,12 @@ public class Main {
         //OcrResult ocrResult = ocrEngine.detect(imagePath, padding, maxSideLen, boxScoreThresh, boxThresh, unClipRatio, doAngle, mostAngle);
 
         //------- print result -------
-        System.out.println(ocrResult.toString());
+        //System.out.println(ocrResult.toString());
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        String json = ow.writeValueAsString(ocrResult);
+        FileWriter writer=new FileWriter(imagePath+"-out.json");
+        writer.write(json);
+        writer.close();
         return;
     }
 }

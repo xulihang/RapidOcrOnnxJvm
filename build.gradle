@@ -12,6 +12,8 @@ repositories {
 }
 
 dependencies {
+    implementation group: 'org.codehaus.jackson', name: 'jackson-core-asl', version: '1.9.13'
+    implementation group: 'org.codehaus.jackson', name: 'jackson-mapper-asl', version: '1.9.13'
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
 }
 
